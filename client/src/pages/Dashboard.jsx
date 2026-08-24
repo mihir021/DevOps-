@@ -11,7 +11,7 @@ function Dashboard() {
       try {
         const res = await api.get('/dashboard');
         setData(res.data);
-      } catch (err) {
+      } catch {
         // Token missing/expired/invalid on the server side - send the user back to login.
         localStorage.removeItem('token');
         navigate('/login');

@@ -56,11 +56,12 @@ Rules going forward:
 
 ## Phase 3 — CI (GitHub Actions)
 
-- [ ] **3.1** `.github/workflows/ci.yml` — checkout + install + lint (server job)
-- [ ] **3.2** Add backend test step to CI
-- [ ] **3.3** Add frontend job (install + lint + test + build)
-- [ ] **3.4** Add Docker build step (no push) to CI
-- [ ] **3.5** Add status badge to README
+- [x] **3.1** `.github/workflows/ci.yml` — checkout + install + lint (server job)
+- [x] **3.2** Add backend test step to CI
+- [x] **3.3** Add frontend job (install + lint + test + build)
+- [x] **3.4** Add Docker build step (no push) to CI
+- [x] **3.5** Add status badge to README
+- [x] **3.6** (Added) Dummy-merge-with-main conflict check job for non-main branches
 
 ## Phase 4 — CD (Deployment)
 
