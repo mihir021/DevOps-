@@ -76,7 +76,7 @@ Rules going forward:
 - [x] **5.2** `prometheus` service in compose + `monitoring/prometheus.yml` scrape config
 - [x] **5.3** `grafana` service, connect Prometheus as data source
 - [x] **5.4** Build a basic dashboard (request rate, latency, error rate)
-- [ ] **5.5** (Stretch) Alert rule for error rate
+- [x] **5.5** (Extended) Deployed Prometheus + Grafana to the real EC2 production server too (not just local docker-compose)
 
 ## Phase 6 — Polish
 
