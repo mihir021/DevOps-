@@ -40,9 +40,9 @@ Rules going forward:
 
 ## Phase 1 — Testing
 
-- [ ] **1.1** Backend test setup: Jest + Supertest config, one trivial passing test
-- [ ] **1.2** Signup route tests (valid input, weak password rejected, duplicate email rejected)
-- [ ] **1.3** Login route tests (correct creds, wrong password, unknown user)
+- [x] **1.1** Backend test setup: Jest + Supertest config, one trivial passing test
+- [x] **1.2** Signup route tests (valid input, weak password rejected, duplicate email rejected)
+- [x] **1.3** Login route tests (correct creds, wrong password, unknown user)
 - [ ] **1.4** Dashboard route tests (valid token, missing token, invalid token)
 - [ ] **1.5** Frontend test setup: Vitest + React Testing Library, one trivial passing test
 - [ ] **1.6** Form validation tests (Signup/Login components)
