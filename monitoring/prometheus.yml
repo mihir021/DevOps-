@@ -1,0 +1,12 @@
+global:
+  # How often Prometheus pulls (scrapes) fresh metric values.
+  scrape_interval: 5s
+
+scrape_configs:
+  - job_name: 'devops-mern-server'
+    static_configs:
+      # "server" is the docker-compose service name - Docker's internal DNS
+      # resolves it to the server container's IP on the shared network.
+      # This only works between containers, which is why it's different from
+      # the "localhost"/public-IP addresses the browser needs to use.
+      - targets: ['server:5000']

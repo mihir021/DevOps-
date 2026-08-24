@@ -33,3 +33,30 @@ services:
         # responding), since a freshly-started Node process may not be
         # ready to serve requests yet.
         condition: service_healthy
+
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: devops-mern-prometheus
+    restart: unless-stopped
+    volumes:
+      - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+    ports:
+      - "${PROMETHEUS_PORT:-9090}:9090"
+    depends_on:
+      server:
+        condition: service_healthy
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: devops-mern-grafana
+    restart: unless-stopped
+    environment:
+      # Change these for anything beyond local learning/dev use.
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+    ports:
+      - "${GRAFANA_PORT:-3000}:3000"
+    volumes:
+      - ./monitoring/grafana/provisioning:/etc/grafana/provisioning:ro
+    depends_on:
+      - prometheus

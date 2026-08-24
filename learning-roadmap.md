@@ -72,10 +72,10 @@ Rules going forward:
 
 ## Phase 5 — Monitoring
 
-- [ ] **5.1** Add `prom-client`, expose `/metrics`
-- [ ] **5.2** `prometheus` service in compose + `monitoring/prometheus.yml` scrape config
-- [ ] **5.3** `grafana` service, connect Prometheus as data source
-- [ ] **5.4** Build a basic dashboard (request rate, latency, error rate)
+- [x] **5.1** Add `prom-client`, expose `/metrics`
+- [x] **5.2** `prometheus` service in compose + `monitoring/prometheus.yml` scrape config
+- [x] **5.3** `grafana` service, connect Prometheus as data source
+- [x] **5.4** Build a basic dashboard (request rate, latency, error rate)
 - [ ] **5.5** (Stretch) Alert rule for error rate
 
 ## Phase 6 — Polish

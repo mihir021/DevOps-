@@ -1,0 +1,16 @@
+apiVersion: 1
+
+# Auto-registers Prometheus as a Grafana data source on startup, so you
+# don't have to click through the UI to add it manually every time you
+# tear down and recreate the stack.
+datasources:
+  - name: Prometheus
+    # Pinning a fixed uid means our dashboard JSON can reliably reference
+    # this exact datasource - without it, Grafana generates a random uid
+    # each time, and the dashboard's panels would fail to resolve it.
+    uid: prometheus
+    type: prometheus
+    access: proxy
+    url: http://prometheus:9090
+    isDefault: true
+    editable: true
