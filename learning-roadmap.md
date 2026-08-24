@@ -65,10 +65,10 @@ Rules going forward:
 
 ## Phase 4 — CD (Deployment)
 
-- [ ] **4.1** Decide target (Docker Hub + Render/Railway vs VPS) — discuss tradeoffs
-- [ ] **4.2** Add GitHub Secrets (Docker Hub creds, Mongo URI, JWT secret)
-- [ ] **4.3** `.github/workflows/cd.yml` — build & push images on merge to `main`
-- [ ] **4.4** Deploy step (PaaS deploy hook OR SSH + `docker compose pull/up`)
+- [x] **4.1** Decide target — chose GHCR (GitHub Container Registry) + AWS EC2 via SSH
+- [x] **4.2** Add GitHub Secrets (EC2_HOST, EC2_USER, EC2_SSH_KEY, MONGODB_URI, JWT_SECRET)
+- [x] **4.3** `.github/workflows/cd.yml` — build & push images to GHCR on merge to `main`
+- [x] **4.4** Deploy step — SSH into EC2, write `.env`, `docker compose pull && up -d`
 
 ## Phase 5 — Monitoring
 

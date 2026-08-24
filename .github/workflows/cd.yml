@@ -1,0 +1,91 @@
+name: CD
+
+# Only runs on pushes to main, and only after CI's checks would apply to
+# that same commit (in a stricter setup we'd make this depend on the CI
+# workflow's result via workflow_run - kept simple here on purpose).
+on:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: read
+  packages: write
+
+jobs:
+  build-and-push:
+    name: Build & push images to GHCR
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build & push server image
+        uses: docker/build-push-action@v6
+        with:
+          context: ./server
+          push: true
+          tags: |
+            ghcr.io/mihir021/devops-mern-server:latest
+            ghcr.io/mihir021/devops-mern-server:${{ github.sha }}
+
+      - name: Build & push client image
+        uses: docker/build-push-action@v6
+        with:
+          context: ./client
+          push: true
+          build-args: |
+            VITE_API_URL=http://${{ secrets.EC2_HOST }}:5000/api
+          tags: |
+            ghcr.io/mihir021/devops-mern-client:latest
+            ghcr.io/mihir021/devops-mern-client:${{ github.sha }}
+
+  deploy:
+    name: Deploy to EC2
+    runs-on: ubuntu-latest
+    needs: build-and-push
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Copy docker-compose.prod.yml to the server
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USER }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          source: 'docker-compose.prod.yml'
+          target: '~/app'
+
+      - name: Write .env and redeploy over SSH
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USER }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          envs: MONGODB_URI,JWT_SECRET
+          script: |
+            set -e
+            mkdir -p ~/app
+            cd ~/app
+            cat > .env <<EOF
+            MONGODB_URI=$MONGODB_URI
+            JWT_SECRET=$JWT_SECRET
+            PORT=5000
+            EOF
+            docker compose -f docker-compose.prod.yml pull
+            docker compose -f docker-compose.prod.yml up -d
+            docker image prune -f
+        env:
+          MONGODB_URI: ${{ secrets.MONGODB_URI }}
+          JWT_SECRET: ${{ secrets.JWT_SECRET }}

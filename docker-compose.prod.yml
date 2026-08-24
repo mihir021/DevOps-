@@ -1,0 +1,31 @@
+services:
+  server:
+    image: ghcr.io/mihir021/devops-mern-server:latest
+    container_name: devops-mern-server
+    restart: unless-stopped
+    env_file:
+      - .env
+    ports:
+      - "5000:5000"
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "node",
+          "-e",
+          "require('http').get('http://localhost:5000/health', res => process.exit(res.statusCode === 200 ? 0 : 1)).on('error', () => process.exit(1))",
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+  client:
+    image: ghcr.io/mihir021/devops-mern-client:latest
+    container_name: devops-mern-client
+    restart: unless-stopped
+    ports:
+      - "80:80"
+    depends_on:
+      server:
+        condition: service_healthy

@@ -11,6 +11,13 @@ RUN npm ci
 # shipped - so unlike server/.env (real secrets: DB password, JWT secret),
 # there's nothing sensitive here to protect. Never put real secrets in a
 # VITE_ variable for this exact reason.
+#
+# ARG/ENV here lets CI override VITE_API_URL at build time (e.g. to point at
+# a real server's public IP in production) without editing the committed
+# client/.env, which stays focused on local development (localhost).
+ARG VITE_API_URL
+ENV VITE_API_URL=${VITE_API_URL}
+
 COPY . .
 RUN npm run build
 
