@@ -55,7 +55,7 @@ function Signup() {
   return (
     <div style={{ maxWidth: 400, margin: '4rem auto', fontFamily: 'sans-serif' }}>
       <h1>Sign Up</h1>
-      <form onSubmit={handleSubmit}>
+      <form onSubmit={handleSubmit} noValidate>
         <input
           name="name"
           placeholder="Name"

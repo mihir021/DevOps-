@@ -38,7 +38,7 @@ function Login() {
   return (
     <div style={{ maxWidth: 400, margin: '4rem auto', fontFamily: 'sans-serif' }}>
       <h1>Log In</h1>
-      <form onSubmit={handleSubmit}>
+      <form onSubmit={handleSubmit} noValidate>
         <input
           name="email"
           type="email"
