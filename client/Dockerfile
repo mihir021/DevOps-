@@ -12,11 +12,9 @@ RUN npm ci
 # there's nothing sensitive here to protect. Never put real secrets in a
 # VITE_ variable for this exact reason.
 #
-# ARG/ENV here lets CI override VITE_API_URL at build time (e.g. to point at
-# a real server's public IP in production) without editing the committed
-# client/.env, which stays focused on local development (localhost).
-ARG VITE_API_URL
-ENV VITE_API_URL=${VITE_API_URL}
+# Note: VITE_API_URL is NOT needed here — the frontend uses a relative "/api"
+# path, and Nginx reverse-proxies it to the server container internally.
+# This means this image works with any server IP/domain without rebuilding.
 
 COPY . .
 RUN npm run build

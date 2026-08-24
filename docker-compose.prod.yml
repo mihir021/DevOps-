@@ -5,8 +5,11 @@ services:
     restart: unless-stopped
     env_file:
       - .env
-    ports:
-      - "5000:5000"
+    # Port 5000 is NOT exposed publicly — the Nginx container (client)
+    # reverse-proxies /api/* to server:5000 internally over the Docker
+    # network. This is more secure than opening port 5000 to the internet.
+    expose:
+      - "5000"
     healthcheck:
       test:
         [

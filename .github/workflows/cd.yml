@@ -44,8 +44,9 @@ jobs:
         with:
           context: ./client
           push: true
-          build-args: |
-            VITE_API_URL=http://${{ secrets.EC2_HOST }}:5000/api
+          # No VITE_API_URL build-arg needed — the frontend uses a relative
+          # "/api" path, and Nginx reverse-proxies it to the server container.
+          # This means the client image works with ANY server IP/domain.
           tags: |
             ghcr.io/mihir021/devops-mern-client:latest
             ghcr.io/mihir021/devops-mern-client:${{ github.sha }}
