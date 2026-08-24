@@ -1,0 +1,35 @@
+services:
+  server:
+    build: ./server
+    container_name: devops-mern-server
+    restart: unless-stopped
+    env_file:
+      - ./server/.env
+    ports:
+      - "${SERVER_PORT:-5000}:5000"
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "node",
+          "-e",
+          "require('http').get('http://localhost:5000/health', res => process.exit(res.statusCode === 200 ? 0 : 1)).on('error', () => process.exit(1))",
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+
+  client:
+    build: ./client
+    container_name: devops-mern-client
+    restart: unless-stopped
+    ports:
+      - "${CLIENT_PORT:-8080}:80"
+    depends_on:
+      server:
+        # Don't just wait for the server container to *start* - wait until
+        # its HEALTHCHECK actually reports healthy (i.e. /health is
+        # responding), since a freshly-started Node process may not be
+        # ready to serve requests yet.
+        condition: service_healthy

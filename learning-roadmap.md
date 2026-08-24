@@ -49,10 +49,10 @@ Rules going forward:
 
 ## Phase 2 — Dockerize
 
-- [ ] **2.1** `server/Dockerfile` (multi-stage) — build + run backend in a container
-- [ ] **2.2** `client/Dockerfile` — build static assets + serve
-- [ ] **2.3** `docker-compose.yml` — run client + server together (Atlas stays external)
-- [ ] **2.4** Add `HEALTHCHECK` to both Dockerfiles
+- [x] **2.1** `server/Dockerfile` (multi-stage) — build + run backend in a container
+- [x] **2.2** `client/Dockerfile` — build static assets + serve
+- [x] **2.3** `docker-compose.yml` — run client + server together (Atlas stays external)
+- [x] **2.4** Add `HEALTHCHECK` to both Dockerfiles
 
 ## Phase 3 — CI (GitHub Actions)
 
