@@ -284,23 +284,25 @@ cat > "./.env" <<EOF
 COMPOSE_PROFILES=${COMPOSE_PROFILE_VAL}
 
 # Local port mappings
+MONGO_PORT=27017
 SERVER_PORT=5000
 CLIENT_PORT=8080
 PROMETHEUS_PORT=9090
 GRAFANA_PORT=3000
 
-# Secrets for local containers
-MONGODB_URI=mongodb+srv://<username>:<password>@cluster0.mongodb.net/${PROJECT_NAME}?retryWrites=true&w=majority
+# Local Docker Database URI (isolated to this project's database)
+# To use MongoDB Atlas instead, replace this with your mongodb+srv:// URI
+MONGODB_URI=mongodb://mongo:27017/${PROJECT_NAME}_db
 JWT_SECRET=${RANDOM_JWT_SECRET}
 GRAFANA_ADMIN_PASSWORD=admin
 EOF
 
-# Server .env
+# Server .env (used for non-Docker local development)
 if [[ ! -f "./server/.env" ]]; then
   cat > "./server/.env" <<EOF
-# Local backend configuration
+# Local backend configuration (for npm run dev)
 PORT=5000
-MONGODB_URI=mongodb+srv://<username>:<password>@cluster0.mongodb.net/${PROJECT_NAME}?retryWrites=true&w=majority
+MONGODB_URI=mongodb://localhost:27017/${PROJECT_NAME}_db
 JWT_SECRET=${RANDOM_JWT_SECRET}
 EOF
 fi
