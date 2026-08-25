@@ -1,7 +1,7 @@
 services:
   server:
-    image: ghcr.io/mihir021/devops-mern-server:latest
-    container_name: devops-mern-server
+    image: ghcr.io/__GITHUB_USER__/__PROJECT_NAME__-server:latest
+    container_name: __PROJECT_NAME__-server
     restart: unless-stopped
     env_file:
       - .env
@@ -24,8 +24,8 @@ services:
       start_period: 10s
 
   client:
-    image: ghcr.io/mihir021/devops-mern-client:latest
-    container_name: devops-mern-client
+    image: ghcr.io/__GITHUB_USER__/__PROJECT_NAME__-client:latest
+    container_name: __PROJECT_NAME__-client
     restart: unless-stopped
     ports:
       - "80:80"
@@ -35,7 +35,9 @@ services:
 
   prometheus:
     image: prom/prometheus:latest
-    container_name: devops-mern-prometheus
+    container_name: __PROJECT_NAME__-prometheus
+    profiles:
+      - monitoring
     restart: unless-stopped
     volumes:
       - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml:ro
@@ -48,7 +50,9 @@ services:
 
   grafana:
     image: grafana/grafana:latest
-    container_name: devops-mern-grafana
+    container_name: __PROJECT_NAME__-grafana
+    profiles:
+      - monitoring
     restart: unless-stopped
     environment:
       - GF_SECURITY_ADMIN_USER=admin
@@ -64,3 +68,4 @@ services:
 volumes:
   prometheus-data:
   grafana-data:
+

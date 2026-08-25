@@ -36,8 +36,8 @@ jobs:
           context: ./server
           push: true
           tags: |
-            ghcr.io/mihir021/devops-mern-server:latest
-            ghcr.io/mihir021/devops-mern-server:${{ github.sha }}
+            ghcr.io/__GITHUB_USER__/__PROJECT_NAME__-server:latest
+            ghcr.io/__GITHUB_USER__/__PROJECT_NAME__-server:${{ github.sha }}
 
       - name: Build & push client image
         uses: docker/build-push-action@v6
@@ -48,13 +48,16 @@ jobs:
           # "/api" path, and Nginx reverse-proxies it to the server container.
           # This means the client image works with ANY server IP/domain.
           tags: |
-            ghcr.io/mihir021/devops-mern-client:latest
-            ghcr.io/mihir021/devops-mern-client:${{ github.sha }}
+            ghcr.io/__GITHUB_USER__/__PROJECT_NAME__-client:latest
+            ghcr.io/__GITHUB_USER__/__PROJECT_NAME__-client:${{ github.sha }}
 
   deploy:
     name: Deploy to EC2
     runs-on: ubuntu-latest
     needs: build-and-push
+    # Only attempt deployment if the EC2_HOST secret has been configured in the repository.
+    # This prevents new template clones from failing with red errors before secrets are added.
+    if: ${{ secrets.EC2_HOST != '' }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v4

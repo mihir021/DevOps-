@@ -21,3 +21,11 @@ Thumbs.db
 # Editor
 .vscode/
 .idea/
+
+# Internal plans and planning documents
+*plan*.md
+*.plan.md
+planning/
+devops-mern-project-plan.md
+learning-roadmap.md
+

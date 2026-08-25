@@ -1,7 +1,7 @@
 {
-  "name": "server",
+  "name": "__PROJECT_NAME__-server",
   "version": "1.0.0",
-  "description": "Backend API for the DevOps MERN learning project.",
+  "description": "__APP_TITLE__ backend REST API.",
   "main": "src/index.js",
   "scripts": {
     "start": "node src/index.js",

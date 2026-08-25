@@ -1,7 +1,7 @@
 services:
   server:
     build: ./server
-    container_name: devops-mern-server
+    container_name: __PROJECT_NAME__-server
     restart: unless-stopped
     env_file:
       - ./server/.env
@@ -22,7 +22,7 @@ services:
 
   client:
     build: ./client
-    container_name: devops-mern-client
+    container_name: __PROJECT_NAME__-client
     restart: unless-stopped
     ports:
       - "${CLIENT_PORT:-8080}:80"
@@ -36,7 +36,9 @@ services:
 
   prometheus:
     image: prom/prometheus:latest
-    container_name: devops-mern-prometheus
+    container_name: __PROJECT_NAME__-prometheus
+    profiles:
+      - monitoring
     restart: unless-stopped
     volumes:
       - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml:ro
@@ -48,7 +50,9 @@ services:
 
   grafana:
     image: grafana/grafana:latest
-    container_name: devops-mern-grafana
+    container_name: __PROJECT_NAME__-grafana
+    profiles:
+      - monitoring
     restart: unless-stopped
     environment:
       # Change these for anything beyond local learning/dev use.
@@ -60,3 +64,4 @@ services:
       - ./monitoring/grafana/provisioning:/etc/grafana/provisioning:ro
     depends_on:
       - prometheus
+
