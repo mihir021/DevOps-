@@ -3,7 +3,7 @@ global:
   scrape_interval: 5s
 
 scrape_configs:
-  - job_name: '__PROJECT_NAME__-server'
+  - job_name: 'mern-server'
     static_configs:
       # "server" is the docker-compose service name - Docker's internal DNS
       # resolves it to the server container's IP on the shared network.

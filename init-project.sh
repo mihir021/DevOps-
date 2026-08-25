@@ -230,27 +230,41 @@ fi
 echo -e "  ⚙️  Substituting placeholders in manifests and config files..."
 
 # Package manifests
-replace_in_file "__PROJECT_NAME__" "${PROJECT_NAME}" "./client/package.json"
-replace_in_file "__APP_TITLE__" "${APP_TITLE}" "./client/package.json"
+node -e "
+  const fs = require('fs');
+  const clientPkgPath = './client/package.json';
+  if (fs.existsSync(clientPkgPath)) {
+    const pkg = JSON.parse(fs.readFileSync(clientPkgPath, 'utf8'));
+    pkg.name = '${PROJECT_NAME}-client';
+    pkg.description = '${APP_TITLE} frontend web application.';
+    fs.writeFileSync(clientPkgPath, JSON.stringify(pkg, null, 2) + '\n');
+  }
 
-replace_in_file "__PROJECT_NAME__" "${PROJECT_NAME}" "./server/package.json"
-replace_in_file "__APP_TITLE__" "${APP_TITLE}" "./server/package.json"
+  const serverPkgPath = './server/package.json';
+  if (fs.existsSync(serverPkgPath)) {
+    const pkg = JSON.parse(fs.readFileSync(serverPkgPath, 'utf8'));
+    pkg.name = '${PROJECT_NAME}-server';
+    pkg.description = '${APP_TITLE} backend REST API.';
+    fs.writeFileSync(serverPkgPath, JSON.stringify(pkg, null, 2) + '\n');
+  }
+"
 
 # HTML Title
-replace_in_file "__APP_TITLE__" "${APP_TITLE}" "./client/index.html"
+replace_in_file "<title>.*</title>" "<title>${APP_TITLE}</title>" "./client/index.html"
 
 # Docker Compose files
-replace_in_file "__PROJECT_NAME__" "${PROJECT_NAME}" "./docker-compose.yml"
-replace_in_file "__PROJECT_NAME__" "${PROJECT_NAME}" "./docker-compose.prod.yml"
-replace_in_file "__GITHUB_USER__" "${GITHUB_USER}" "./docker-compose.prod.yml"
+replace_in_file "container_name: [a-zA-Z0-9_-]+-server" "container_name: ${PROJECT_NAME}-server" "./docker-compose.yml"
+replace_in_file "container_name: [a-zA-Z0-9_-]+-client" "container_name: ${PROJECT_NAME}-client" "./docker-compose.yml"
+replace_in_file "container_name: [a-zA-Z0-9_-]+-prometheus" "container_name: ${PROJECT_NAME}-prometheus" "./docker-compose.yml"
+replace_in_file "container_name: [a-zA-Z0-9_-]+-grafana" "container_name: ${PROJECT_NAME}-grafana" "./docker-compose.yml"
 
-# Workflows (if kept)
-replace_in_file "__PROJECT_NAME__" "${PROJECT_NAME}" "./.github/workflows/ci.yml"
-replace_in_file "__PROJECT_NAME__" "${PROJECT_NAME}" "./.github/workflows/cd.yml"
-replace_in_file "__GITHUB_USER__" "${GITHUB_USER}" "./.github/workflows/cd.yml"
+replace_in_file "container_name: [a-zA-Z0-9_-]+-server" "container_name: ${PROJECT_NAME}-server" "./docker-compose.prod.yml"
+replace_in_file "container_name: [a-zA-Z0-9_-]+-client" "container_name: ${PROJECT_NAME}-client" "./docker-compose.prod.yml"
+replace_in_file "container_name: [a-zA-Z0-9_-]+-prometheus" "container_name: ${PROJECT_NAME}-prometheus" "./docker-compose.prod.yml"
+replace_in_file "container_name: [a-zA-Z0-9_-]+-grafana" "container_name: ${PROJECT_NAME}-grafana" "./docker-compose.prod.yml"
 
 # Prometheus
-replace_in_file "__PROJECT_NAME__" "${PROJECT_NAME}" "./monitoring/prometheus.yml"
+replace_in_file "job_name: '[^']+'" "job_name: '${PROJECT_NAME}-server'" "./monitoring/prometheus.yml"
 
 # ==============================================================================
 # STEP 5: Secrets & Environment Files

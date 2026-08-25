@@ -1,7 +1,7 @@
 {
-  "name": "__PROJECT_NAME__-client",
+  "name": "mern-client",
   "version": "1.0.0",
-  "description": "__APP_TITLE__ frontend web application.",
+  "description": "Frontend web application.",
   "main": "index.js",
   "scripts": {
     "dev": "vite",

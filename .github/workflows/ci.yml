@@ -85,14 +85,14 @@ jobs:
         with:
           context: ./server
           push: false
-          tags: __PROJECT_NAME__-server:ci
+          tags: server:ci
 
       - name: Build client image
         uses: docker/build-push-action@v6
         with:
           context: ./client
           push: false
-          tags: __PROJECT_NAME__-client:ci
+          tags: client:ci
 
   # ---- Dummy-merge conflict check ----
   # If you push to any branch other than main, this tries merging main into

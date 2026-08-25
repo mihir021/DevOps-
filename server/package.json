@@ -1,7 +1,7 @@
 {
-  "name": "__PROJECT_NAME__-server",
+  "name": "mern-server",
   "version": "1.0.0",
-  "description": "__APP_TITLE__ backend REST API.",
+  "description": "Backend REST API.",
   "main": "src/index.js",
   "scripts": {
     "start": "node src/index.js",

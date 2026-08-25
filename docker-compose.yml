@@ -1,7 +1,7 @@
 services:
   server:
     build: ./server
-    container_name: __PROJECT_NAME__-server
+    container_name: mern-server
     restart: unless-stopped
     env_file:
       - ./server/.env
@@ -22,7 +22,7 @@ services:
 
   client:
     build: ./client
-    container_name: __PROJECT_NAME__-client
+    container_name: mern-client
     restart: unless-stopped
     ports:
       - "${CLIENT_PORT:-8080}:80"
@@ -36,7 +36,7 @@ services:
 
   prometheus:
     image: prom/prometheus:latest
-    container_name: __PROJECT_NAME__-prometheus
+    container_name: mern-prometheus
     profiles:
       - monitoring
     restart: unless-stopped
@@ -50,7 +50,7 @@ services:
 
   grafana:
     image: grafana/grafana:latest
-    container_name: __PROJECT_NAME__-grafana
+    container_name: mern-grafana
     profiles:
       - monitoring
     restart: unless-stopped
