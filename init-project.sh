@@ -367,6 +367,8 @@ if [[ "$USE_CD" == "y" ]]; then
   if [[ "$USE_MONITORING" == "y" ]]; then
     echo -e "    • ${GREEN}GRAFANA_ADMIN_PASSWORD${RESET}: Password to access Grafana at port 3000"
   fi
+  echo -e "\n  ${YELLOW}💡 Running multiple projects on the same EC2 instance?${RESET}"
+  echo -e "  To prevent port conflicts, add optional secrets: ${GREEN}SERVER_PORT${RESET} (e.g. 5001) and ${GREEN}CLIENT_PORT${RESET} (e.g. 8081)"
   echo ""
 fi
 
