@@ -91,7 +91,7 @@ jobs:
           username: ${{ secrets.EC2_USER }}
           key: ${{ secrets.EC2_SSH_KEY }}
           source: 'docker-compose.prod.yml,monitoring'
-          target: '~/apps/${{ github.event.repository.name }}'
+          target: 'apps/${{ github.event.repository.name }}'
 
       - name: Write .env and redeploy over SSH
         if: steps.check_secrets.outputs.configured == 'true'
@@ -103,7 +103,7 @@ jobs:
           envs: MONGODB_URI,JWT_SECRET,GRAFANA_ADMIN_PASSWORD,SERVER_IMAGE,CLIENT_IMAGE,SERVER_PORT,CLIENT_PORT,PROMETHEUS_PORT,GRAFANA_PORT
           script: |
             set -e
-            DEPLOY_DIR="~/apps/${{ github.event.repository.name }}"
+            DEPLOY_DIR="apps/${{ github.event.repository.name }}"
             mkdir -p $DEPLOY_DIR
             cd $DEPLOY_DIR
             
