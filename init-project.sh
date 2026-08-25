@@ -35,10 +35,11 @@ echo "    🚀  MERN Stack Production Template Initializer                      
 echo "========================================================================"
 echo -e "${RESET}"
 
-# ---- Parse Command-Line Flags ----
+# Parse Command-Line Flags
 PROJECT_NAME=""
 GITHUB_USER=""
 APP_TITLE=""
+MONGODB_URI_INPUT=""
 USE_CI=""
 USE_CD=""
 USE_MONITORING=""
@@ -56,6 +57,10 @@ while [[ $# -gt 0 ]]; do
       ;;
     --title)
       APP_TITLE="$2"
+      shift 2
+      ;;
+    --mongo)
+      MONGODB_URI_INPUT="$2"
       shift 2
       ;;
     --ci)
@@ -81,6 +86,7 @@ while [[ $# -gt 0 ]]; do
       echo "  --name <name>          Project slug name (e.g., 'shop-ease')"
       echo "  --user <username>      GitHub username or org (e.g., 'mihir021')"
       echo "  --title <title>        Display title of the Web App (e.g., 'ShopEase App')"
+      echo "  --mongo <uri>          MongoDB Atlas connection string (mongodb+srv://...)"
       echo "  --ci <y|n>             Enable/disable GitHub Actions CI workflow"
       echo "  --cd <y|n>             Enable/disable GitHub Actions CD deployment workflow"
       echo "  --monitoring <y|n>     Enable/disable Prometheus + Grafana monitoring profile"
@@ -146,6 +152,13 @@ if [[ -z "$APP_TITLE" ]]; then
   APP_TITLE="${INPUT_TITLE:-$DEFAULT_TITLE}"
 fi
 
+if [[ -z "$MONGODB_URI_INPUT" ]]; then
+  echo -e "\n${YELLOW}Enter your MongoDB Atlas Connection URI (press Enter to add later in server/.env):${RESET}"
+  echo -e "${CYAN}Format: mongodb+srv://<username>:<password>@cluster0.mongodb.net/${PROJECT_NAME}?retryWrites=true&w=majority${RESET}"
+  read -r -p "MongoDB Atlas URI: " INPUT_MONGO
+  MONGODB_URI_INPUT="${INPUT_MONGO:-}"
+fi
+
 # ==============================================================================
 # STEP 2: Feature Toggles
 # ==============================================================================
@@ -188,6 +201,7 @@ echo -e "\n${BOLD}${BLUE}Configuration Summary:${RESET}"
 echo -e "  • Project Name:       ${GREEN}${PROJECT_NAME}${RESET}"
 echo -e "  • GitHub User:        ${GREEN}${GITHUB_USER}${RESET}"
 echo -e "  • App Title:          ${GREEN}${APP_TITLE}${RESET}"
+echo -e "  • MongoDB Atlas URI:  $([ -n "$MONGODB_URI_INPUT" ] && echo -e "${GREEN}Configured${RESET}" || echo -e "${YELLOW}Pending (must be added in server/.env)${RESET}")"
 echo -e "  • CI Workflow:        $([ "$USE_CI" = "y" ] && echo -e "${GREEN}Enabled${RESET}" || echo -e "${RED}Disabled (file will be removed)${RESET}")"
 echo -e "  • CD Workflow:        $([ "$USE_CD" = "y" ] && echo -e "${GREEN}Enabled${RESET}" || echo -e "${RED}Disabled (file will be removed)${RESET}")"
 echo -e "  • Monitoring Stack:   $([ "$USE_MONITORING" = "y" ] && echo -e "${GREEN}Enabled (profile: monitoring)${RESET}" || echo -e "${YELLOW}Disabled (dormant profile)${RESET}")"
@@ -225,9 +239,9 @@ else
 fi
 
 # ==============================================================================
-# STEP 4: Placeholder Replacement
+# STEP 4: Manifest & Configuration Updates
 # ==============================================================================
-echo -e "  ⚙️  Substituting placeholders in manifests and config files..."
+echo -e "  ⚙️  Updating manifests and configuration files..."
 
 # Package manifests
 node -e "
@@ -284,28 +298,23 @@ cat > "./.env" <<EOF
 COMPOSE_PROFILES=${COMPOSE_PROFILE_VAL}
 
 # Local port mappings
-MONGO_PORT=27017
 SERVER_PORT=5000
 CLIENT_PORT=8080
 PROMETHEUS_PORT=9090
 GRAFANA_PORT=3000
 
-# Local Docker Database URI (isolated to this project's database)
-# To use MongoDB Atlas instead, replace this with your mongodb+srv:// URI
-MONGODB_URI=mongodb://mongo:27017/${PROJECT_NAME}_db
+# MongoDB Atlas URI & Secrets
+MONGODB_URI=${MONGODB_URI_INPUT}
 JWT_SECRET=${RANDOM_JWT_SECRET}
 GRAFANA_ADMIN_PASSWORD=admin
 EOF
 
-# Server .env (used for non-Docker local development)
-if [[ ! -f "./server/.env" ]]; then
-  cat > "./server/.env" <<EOF
-# Local backend configuration (for npm run dev)
+# Server .env
+cat > "./server/.env" <<EOF
 PORT=5000
-MONGODB_URI=mongodb://localhost:27017/${PROJECT_NAME}_db
+MONGODB_URI=${MONGODB_URI_INPUT}
 JWT_SECRET=${RANDOM_JWT_SECRET}
 EOF
-fi
 
 # Client .env
 if [[ ! -f "./client/.env" ]]; then
@@ -322,9 +331,17 @@ echo -e "${BOLD}${GREEN}========================================================
 # ==============================================================================
 # STEP 6: Output Next Steps & Developer Guidance
 # ==============================================================================
+if [[ -z "$MONGODB_URI_INPUT" ]]; then
+  echo -e "${BOLD}${YELLOW}⚠️  IMPORTANT: MongoDB Atlas URI is not yet configured.${RESET}"
+  echo -e "   Please open ${BOLD}server/.env${RESET} and paste your MongoDB Atlas connection string:"
+  echo -e "   ${CYAN}MONGODB_URI=mongodb+srv://<user>:<password>@cluster0.mongodb.net/${PROJECT_NAME}?retryWrites=true&w=majority${RESET}"
+  echo -e "   (Also ensure your IP is whitelisted in MongoDB Atlas -> Network Access)\n"
+else
+  echo -e "  ✅ MongoDB Atlas URI configured for database: ${GREEN}${PROJECT_NAME}${RESET}\n"
+fi
+
 echo -e "${BOLD}${CYAN}▶ LOCAL DEVELOPMENT COMMANDS:${RESET}"
-echo -e "  1. Add your real MongoDB Atlas connection URI in ${BOLD}server/.env${RESET}"
-echo -e "  2. Start with Docker Compose:"
+echo -e "  1. Start with Docker Compose:"
 if [[ "$USE_MONITORING" == "y" ]]; then
   echo -e "     ${YELLOW}docker compose --profile monitoring up --build${RESET}"
   echo -e "     (Frontend: :8080 | Backend: :5000 | Prometheus: :9090 | Grafana: :3000)"
@@ -334,14 +351,14 @@ else
   echo -e "     Tip: Run with monitoring anytime via: ${MAGENTA}docker compose --profile monitoring up${RESET}"
 fi
 echo ""
-echo -e "  3. Or run without Docker:"
+echo -e "  2. Or run without Docker:"
 echo -e "     ${YELLOW}cd server && npm install && npm run dev${RESET}"
 echo -e "     ${YELLOW}cd client && npm install && npm run dev${RESET}"
 echo ""
 
 if [[ "$USE_CD" == "y" ]]; then
   echo -e "${BOLD}${CYAN}▶ AWS EC2 DEPLOYMENT (GITHUB SECRETS CHECKLIST):${RESET}"
-  echo -e "  Go to your GitHub repo → ${BOLD}Settings > Secrets and variables > Actions${RESET} and add:"
+  echo -e "  In your new repo → ${BOLD}Settings > Secrets and variables > Actions${RESET} add:"
   echo -e "    • ${GREEN}EC2_HOST${RESET}:               Public IP address of your EC2 instance"
   echo -e "    • ${GREEN}EC2_USER${RESET}:               SSH user (usually 'ubuntu')"
   echo -e "    • ${GREEN}EC2_SSH_KEY${RESET}:            Your private SSH key (.pem file content)"
@@ -352,3 +369,4 @@ if [[ "$USE_CD" == "y" ]]; then
   fi
   echo ""
 fi
+
