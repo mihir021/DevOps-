@@ -1,140 +1,139 @@
 # 🚀 MERN Stack Production Starter Template
 
-[![CI](https://github.com/mihir021/DevOps-/actions/workflows/ci.yml/badge.svg)](https://github.com/mihir021/DevOps-/actions/workflows/ci.yml)
-[![Docker](https://img.shields.io/badge/docker-compose-blue.svg)](https://www.docker.com/)
-[![React 19](https://img.shields.io/badge/react-19-blue.svg)](https://react.dev/)
-[![Node.js 22](https://img.shields.io/badge/node.js-22-green.svg)](https://nodejs.org/)
-[![License: ISC](https://img.shields.io/badge/License-ISC-blue.svg)](https://opensource.org/licenses/ISC)
-
 A production-grade, modular **MERN Stack Starter Template** equipped with automated CI/CD, Docker multi-stage containerization, Nginx reverse proxy, and optional Prometheus + Grafana observability.
+
+Designed to support **Multi-Project Deployments** — you can host dozens of these projects on the exact same EC2 server without port conflicts!
 
 ---
 
 ## ✨ Features
+- **Frontend:** React 19, Vite, React Router v7.
+- **Backend:** Node.js 22, Express 5, Mongoose 9 (MongoDB Atlas).
+- **Nginx Reverse Proxy:** Internal routing for `/api/*` requests — no exposed backend port, zero CORS errors.
+- **Multi-Stage Docker:** Ultra-slim Alpine images.
+- **Observability:** Prometheus & Grafana (toggleable).
+- **Automated CI/CD:** Zero-downtime SSH deployment to AWS EC2 via GitHub Actions.
+- **Multi-Tenant Ready:** Dynamic port mapping allows multiple projects on a single server.
 
-- **⚡ Frontend:** React 19, Vite, React Router v7, Axios (pre-configured with JWT interceptors).
-- **🛡️ Backend:** Node.js 22, Express 5, Mongoose 9 (MongoDB Atlas), bcryptjs password hashing, JWT stateless authentication.
-- **🔄 Nginx Reverse Proxy:** Internal routing for `/api/*` requests on port 80 — no exposed backend port, no hardcoded IPs, zero CORS errors.
-- **🐳 Multi-Stage Docker:** Ultra-slim Alpine images (~25MB client, ~150MB server) with automated healthchecks.
-- **📊 Observability Stack (Toggleable):** Prometheus metric scraping (`/metrics`) and pre-configured Grafana dashboards on Docker Compose profiles.
-- **🚀 Automated CI/CD:** GitHub Actions workflow for linting, testing, Docker image building (GHCR), and zero-downtime SSH deployment to AWS EC2.
-- **🪄 60-Second Setup Script:** Interactive `./init-project.sh` to initialize and customize names, toggles, and secrets in seconds.
+---
+
+## 🏗️ Architecture Diagrams
+
+### Single Project Architecture
+```mermaid
+graph TD
+    User([User]) -->|HTTP| EC2[EC2 Instance]
+    
+    subgraph EC2[EC2 Instance / Docker Engine]
+        Client[Nginx React Client]
+        Server[Express Node.js Server]
+        Prometheus[Prometheus]
+        Grafana[Grafana]
+        
+        Client -->|/api/*| Server
+        Prometheus -.->|Scrapes /metrics| Server
+        Grafana -.->|Reads| Prometheus
+    end
+    
+    Server -->|Mongoose| MongoDB[(MongoDB Atlas)]
+```
+
+### Multi-Project Architecture (Same Server)
+```mermaid
+graph TD
+    UserA([User A]) -->|Port 8080| Nginx1[Project-1 Client]
+    UserB([User B]) -->|Port 8081| Nginx2[Project-2 Client]
+    
+    subgraph EC2[Shared EC2 Server]
+        subgraph Project 1
+            Nginx1 --> Server1[Project-1 Server]
+        end
+        subgraph Project 2
+            Nginx2 --> Server2[Project-2 Server]
+        end
+    end
+```
 
 ---
 
 ## 🏁 Quickstart
 
-### 1. Create a Repository from this Template
-1. Click the green **"Use this template"** button at the top of this GitHub repository → **"Create a new repository"**.
-2. Clone your new repository to your local machine:
-   ```bash
-   git clone https://github.com/<YOUR_USERNAME>/<YOUR_PROJECT_NAME>.git
-   cd <YOUR_PROJECT_NAME>
-   ```
+### 1. Create a Repository
+1. Click **"Use this template"** → **"Create a new repository"**.
+2. Clone your new repository locally:
+   `git clone https://github.com/<USERNAME>/<PROJECT_NAME>.git`
 
 ### 2. Initialize in 60 Seconds
-Run the interactive initializer script:
-```bash
-./init-project.sh
-```
-
-The script will prompt you for:
-1. **Project Slug Name** (e.g., `shop-ease`)
-2. **GitHub Username / Org** (e.g., `mihir021`)
-3. **App Title** (e.g., `ShopEase App`)
-4. **Feature Toggles**:
-   - `Enable CI?` (y/n) — lints and tests code on every push
-   - `Enable CD?` (y/n) — builds GHCR images & deploys to EC2 on push to `main`
-   - `Enable Monitoring?` (y/n) — activates Prometheus & Grafana profile
-
----
-
-## 💻 Local Development
-
-### Option A: Running with Docker Compose (Recommended)
-
-```bash
-# Standard mode (Frontend + Backend):
-docker compose up --build
-
-# With Prometheus & Grafana Monitoring enabled:
-docker compose --profile monitoring up --build
-```
-
-| Service | Local URL | Notes |
-|---|---|---|
-| **Client (Nginx + React)** | [http://localhost:8080](http://localhost:8080) | Proxies `/api/*` to server internally |
-| **Server (Express API)** | [http://localhost:5000](http://localhost:5000) | REST API & `/health` endpoint |
-| **Prometheus** | [http://localhost:9090](http://localhost:9090) | *(if monitoring profile active)* |
-| **Grafana** | [http://localhost:3000](http://localhost:3000) | *(if monitoring profile active, user: `admin`/`admin`)* |
-
-### Option B: Running without Docker
-
-```bash
-# 1. Backend Server
-cd server
-npm install
-npm run dev      # Starts on http://localhost:5000
-
-# 2. Frontend Client (separate terminal)
-cd client
-npm install
-npm run dev      # Starts on http://localhost:5173 (Vite proxies /api to :5000)
-```
-
----
-
-## 🧪 Testing & Quality Gates
-
-```bash
-# Run server tests (Jest + Supertest + in-memory MongoDB)
-cd server && npm test
-
-# Run client tests (Vitest + Testing Library)
-cd client && npm test
-
-# Run linters
-cd server && npm run lint
-cd client && npm run lint
-```
+Run the interactive initializer:
+`./init-project.sh`
+This sets up your project slug, GitHub username, and feature toggles.
 
 ---
 
 ## ☁️ Production Deployment (AWS EC2)
 
-When code is pushed to `main`, GitHub Actions (`.github/workflows/cd.yml`) automatically builds production containers, pushes them to GitHub Container Registry (GHCR), and deploys to your EC2 instance over SSH.
+This template uses GitHub Actions to automatically deploy to your EC2 instance on every push to `main`. 
 
-### Required GitHub Secrets
-Go to **Settings > Secrets and variables > Actions** in your GitHub repository and add:
+> [!WARNING]
+> **Important:** Your deployment will **SKIP** if you do not configure all GitHub Secrets correctly. If your "Deploy to EC2" job finishes in exactly 7 seconds with a green checkmark, it means it skipped deployment due to missing secrets!
+
+### Step 1: Add GitHub Secrets
+Go to **Settings > Secrets and variables > Actions > Repository secrets** and add exactly these:
 
 | Secret Name | Description | Example |
 |---|---|---|
-| `EC2_HOST` | Public IPv4 address of your EC2 instance | `54.166.198.31` |
+| `EC2_HOST` | Public IPv4 address of your server | `54.166.198.31` |
 | `EC2_USER` | SSH username | `ubuntu` |
-| `EC2_SSH_KEY` | Contents of your private `.pem` SSH key | `-----BEGIN RSA PRIVATE KEY-----...` |
-| `MONGODB_URI` | MongoDB Atlas production connection URI | `mongodb+srv://user:pass@cluster.mongodb.net/app` |
-| `JWT_SECRET` | Secret key used to sign JWT auth tokens | `random-32-byte-hex-string` |
-| `GRAFANA_ADMIN_PASSWORD` | Password for Grafana dashboard access | `securepassword123` |
+| `EC2_SSH_KEY` | Contents of your private `.pem` SSH key. **See warning below!** | `-----BEGIN RSA PRIVATE KEY-----...` |
+| `MONGODB_URI` | MongoDB Atlas URI | `mongodb+srv://user:pass@cluster...` |
+| `JWT_SECRET` | Secret string for auth | `super-secret-key-123` |
 
-### EC2 Security Group Rules
-| Type | Port | Source | Reason |
+**Dynamic Port Secrets (Critical for Multi-Project!):**
+To prevent port conflicts when hosting multiple projects, you MUST define unique ports for every new project.
+| Secret Name | Description | Project 1 Example | Project 2 Example |
 |---|---|---|---|
-| **SSH** | `22` | Your IP | Admin shell access |
-| **HTTP** | `80` | `0.0.0.0/0` | Web application (Nginx handles React + API) |
-| **Custom TCP** | `3000` | Your IP | Grafana Dashboard *(optional)* |
-| **Custom TCP** | `9090` | Your IP | Prometheus UI *(optional)* |
+| `CLIENT_PORT` | The public port for your website | `8080` | `8081` |
+| `SERVER_PORT` | The backend port (internal only) | `5000` | `5001` |
+| `PROMETHEUS_PORT` | Port for Prometheus UI | `9090` | `9091` |
+| `GRAFANA_PORT` | Port for Grafana Dashboard | `3000` | `3001` |
+
+> [!CAUTION]
+> **Formatting your `EC2_SSH_KEY`:** 
+> Copying the `.pem` file incorrectly is the #1 cause of deployment failure (Error: `unable to authenticate`). 
+> You MUST copy the entire file including the first and last lines, ensuring the line breaks are preserved exactly. Do not paste it as one long horizontal string.
+> ```text
+> -----BEGIN RSA PRIVATE KEY-----
+> MIIEpAIBAAKCAQEA...
+> (many lines of text)
+> -----END RSA PRIVATE KEY-----
+> ```
+
+### Step 2: Open AWS Security Group Ports
+Once your secrets are set and your code is pushed, you must open the `CLIENT_PORT` (and Grafana/Prometheus ports if using them) in AWS.
+1. Go to your EC2 instance in AWS.
+2. Go to the **Security** tab and click your **Security Group**.
+3. Click **Edit inbound rules** -> **Add rule**.
+4. Type: **Custom TCP**, Port: **Your CLIENT_PORT (e.g. 8081)**, Source: **Anywhere-IPv4**.
+5. Save the rules.
 
 ---
 
-## 📚 Documentation
+## 🛠️ Troubleshooting / Q&A
 
-Detailed guides and architecture specifications are available in the [`docs/`](./docs) folder:
-- [Architecture & System Diagrams](./docs/system-diagrams.md)
-- [Complete Project Overview](./docs/project-overview.md)
-- [CI Pipeline Explained](./docs/ci-pipeline-explained.md)
-- [CD Pipeline Explained](./docs/cd-pipeline-explained.md)
-- [Docker Architecture](./docs/docker-explained.md)
-- [Prometheus & Grafana Monitoring](./docs/monitoring-explained.md)
+**Q: My deployment finishes perfectly, but when I visit the IP address, my browser spins forever and says "Connection Timed Out".**
+> **A:** Your AWS Firewall is blocking the port! "Connection Timed Out" means the server's firewall dropped your packets. Go to your AWS Security Group and make sure you added an Inbound Rule for your `CLIENT_PORT` (e.g., 8080 or 8081).
+
+**Q: My browser instantly rejects the connection saying "Connection Refused".**
+> **A:** "Connection Refused" means your AWS Firewall is OPEN (which is good), but the Docker containers are not running on the server. This usually happens if your GitHub Actions deployment skipped, or if your MongoDB URI is incorrect causing the backend container to crash on startup. Check your GitHub Actions logs!
+
+**Q: My "Deploy to EC2" job took exactly 7 seconds and got a green checkmark, but nothing deployed!**
+> **A:** The workflow has a safety check. If it cannot find the `EC2_HOST` secret in your "Repository secrets", it skips the deployment to prevent errors. Go add the `EC2_HOST` secret and try again.
+
+**Q: In my GitHub Actions logs, I see the error: `Bind for 0.0.0.0:80 failed: port is already allocated`.**
+> **A:** You are trying to start a project on a port that is already being used by another project (or by Nginx/Apache) on your server. Make sure you set unique `CLIENT_PORT`, `SERVER_PORT`, `PROMETHEUS_PORT`, and `GRAFANA_PORT` GitHub Secrets for this repository.
+
+**Q: In my GitHub Actions logs, I see the error: `ssh: handshake failed: ssh: unable to authenticate, attempted methods [none publickey], no supported methods remain`.**
+> **A:** GitHub found your `EC2_SSH_KEY`, but the EC2 server rejected it. This almost always means the formatting of the key was lost when you copy-pasted it into GitHub Secrets. Open your `.pem` file in a code editor like VS Code, select all, copy, and paste it again.
 
 ---
 
