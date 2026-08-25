@@ -53,7 +53,8 @@ async function connectDB() {
       '👉 Checklist:\n' +
       '  • Verify database username & password in MONGODB_URI.\n' +
       '  • Check MongoDB Atlas -> Network Access (IP Whitelist / 0.0.0.0/0).\n' +
-      '======================================================================\n'
+      '======================================================================\n',
+      { cause: err }
     );
   }
 }
