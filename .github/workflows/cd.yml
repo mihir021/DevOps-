@@ -83,6 +83,16 @@ jobs:
           echo "SERVER_IMAGE=ghcr.io/${REPO_LC}-server" >> $GITHUB_ENV
           echo "CLIENT_IMAGE=ghcr.io/${REPO_LC}-client" >> $GITHUB_ENV
 
+      - name: Create deployment directory
+        if: steps.check_secrets.outputs.configured == 'true'
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USER }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          script: |
+            mkdir -p apps/${{ github.event.repository.name }}
+
       - name: Copy compose file + monitoring config to the server
         if: steps.check_secrets.outputs.configured == 'true'
         uses: appleboy/scp-action@v0.1.7
