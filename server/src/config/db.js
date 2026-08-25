@@ -20,15 +20,15 @@ async function connectDB() {
   }
 
   // 2. Check if the URI still contains unconfigured placeholders
-  if (uri.includes('<username>') || uri.includes('<password>') || uri.includes('<database>')) {
+  if (uri.includes('<username>') || uri.includes('<password>') || uri.includes('<database>') || uri.includes('cluster0.mongodb.net')) {
     throw new Error(
       '\n' +
       '======================================================================\n' +
-      '❌ MONGODB_URI contains unconfigured placeholder values (<username>/<password>)!\n\n' +
+      '❌ MONGODB_URI contains unconfigured placeholder values (like cluster0.mongodb.net or <username>)!\n\n' +
       '👉 HOW TO FIX:\n' +
       '1. Open server/.env (or root .env).\n' +
-      '2. Replace <username> and <password> with your actual MongoDB Atlas database credentials.\n' +
-      '3. Ensure the database name is specified before query parameters (e.g., ...mongodb.net/my_db?retryWrites=true).\n' +
+      '2. Replace the entire connection string with your ACTUAL MongoDB Atlas URI.\n' +
+      '3. You can find this in MongoDB Atlas -> Database -> Connect -> Drivers.\n' +
       '======================================================================\n'
     );
   }
