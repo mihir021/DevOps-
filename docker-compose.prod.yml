@@ -28,7 +28,7 @@ services:
     container_name: mern-client
     restart: unless-stopped
     ports:
-      - "80:80"
+      - "${CLIENT_PORT:-8080}:80"
     depends_on:
       server:
         condition: service_healthy
@@ -43,7 +43,7 @@ services:
       - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml:ro
       - prometheus-data:/prometheus
     ports:
-      - "9090:9090"
+      - "${PROMETHEUS_PORT:-9090}:9090"
     depends_on:
       server:
         condition: service_healthy
@@ -58,7 +58,7 @@ services:
       - GF_SECURITY_ADMIN_USER=admin
       - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_ADMIN_PASSWORD}
     ports:
-      - "3000:3000"
+      - "${GRAFANA_PORT:-3000}:3000"
     volumes:
       - ./monitoring/grafana/provisioning:/etc/grafana/provisioning:ro
       - grafana-data:/var/lib/grafana
