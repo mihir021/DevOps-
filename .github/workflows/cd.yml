@@ -61,20 +61,30 @@ jobs:
     name: Deploy to EC2
     runs-on: ubuntu-latest
     needs: build-and-push
-    # Only attempt deployment if the EC2_HOST secret has been configured in the repository.
-    # This prevents new template clones from failing with red errors before secrets are added.
-    if: ${{ secrets.EC2_HOST != '' }}
     steps:
+      - name: Check if EC2 secrets are configured
+        id: check_secrets
+        run: |
+          if [ -z "${{ secrets.EC2_HOST }}" ]; then
+            echo "::notice::EC2_HOST secret is not configured. Skipping deployment."
+            echo "configured=false" >> $GITHUB_OUTPUT
+          else
+            echo "configured=true" >> $GITHUB_OUTPUT
+          fi
+
       - name: Checkout code
+        if: steps.check_secrets.outputs.configured == 'true'
         uses: actions/checkout@v4
 
       - name: Set lowercase image tags
+        if: steps.check_secrets.outputs.configured == 'true'
         run: |
           REPO_LC="${GITHUB_REPOSITORY,,}"
           echo "SERVER_IMAGE=ghcr.io/${REPO_LC}-server" >> $GITHUB_ENV
           echo "CLIENT_IMAGE=ghcr.io/${REPO_LC}-client" >> $GITHUB_ENV
 
       - name: Copy compose file + monitoring config to the server
+        if: steps.check_secrets.outputs.configured == 'true'
         uses: appleboy/scp-action@v0.1.7
         with:
           host: ${{ secrets.EC2_HOST }}
@@ -84,6 +94,7 @@ jobs:
           target: '~/app'
 
       - name: Write .env and redeploy over SSH
+        if: steps.check_secrets.outputs.configured == 'true'
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.EC2_HOST }}
